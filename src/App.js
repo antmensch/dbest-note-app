@@ -1,107 +1,25 @@
-import React, {useState, useEffect} from "react"
-import Sidebar from "./components/Sidebar"
-import Editor from "./components/Editor"
-import { data } from "./data"
-import Split from "react-split"
-import {nanoid} from "nanoid"
+import { Route, Routes } from "react-router-dom"
+import Notes from "./components/Notes"
+import Contact from "./components/Contact"
+import Home from "./components/Home"
 import './App.css';
+import Navbar from "./components/Navbar"
 
 export default function App() {
-    /**
-     * Challenge:
-     * 1. Every time the `notes` array changes, save it 
-     *    in localStorage. You'll need to use JSON.stringify()
-     *    to turn the array into a string to save in localStorage.
-     * 2. When the app first loads, initialize the notes state
-     *    with the notes saved in localStorage. You'll need to
-     *    use JSON.parse() to turn the stringified array back
-     *    into a real JS array.
-     */
-
-    const [notes, setNotes] = useState(() => JSON.parse(localStorage.getItem('notes')) || [])
-    const [currentNoteId, setCurrentNoteId] = useState(
-        (notes[0] && notes[0].id) || ""
-    )
-
-    useEffect(() => {
-      localStorage.setItem('notes', JSON.stringify(notes));
-    }, [notes]);
-    
-    function createNewNote() {
-        const newNote = {
-            id: nanoid(),
-            body: "# Type your markdown note's title here"
-        }
-        setNotes(prevNotes => [newNote, ...prevNotes])
-        setCurrentNoteId(newNote.id)
-    }
-    
-    function updateNote(text) {
-        setNotes((prev) => {
-            let index = prev.findIndex((elem) => elem.id === currentNoteId);
-            let updatedNote = {...prev[index], body: text};
-            let newNotes = [...prev];
-            newNotes.splice(index, 1);
-            newNotes.unshift(updatedNote);
-            return newNotes;
-        });
-    }
-
-    function deleteNote(event, noteId) {
-        event.stopPropagation();
-        setNotes(prev => prev.filter( elem => elem.id != noteId )));
-
-    }
-    
-    function findCurrentNote() {
-        return notes.find(note => {
-            return note.id === currentNoteId
-        }) || notes[0]
-    }
-
-
-    
     return (
-        <main>
-        {
-            notes.length > 0 
-            ?
-            <Split 
-                sizes={[30, 70]} 
-                direction="horizontal" 
-                className="split"
-            >
-                <Sidebar
-                    notes={notes}
-                    currentNote={findCurrentNote()}
-                    setCurrentNoteId={setCurrentNoteId}
-                    newNote={createNewNote}
-                    deleteNote={deleteNote}
-                />
-                {
-                    currentNoteId && 
-                    notes.length > 0 &&
-                    <Editor 
-                        currentNote={findCurrentNote()} 
-                        updateNote={updateNote} 
-                    />
-                }
-            </Split>
-            
-            :
-            <div className="no-notes">
-                <h1>You have no notes</h1>
-                <button 
-                    className="first-note" 
-                    onClick={createNewNote}
-                >
-                    Create one now
-                </button>
-            </div>
-            
-        }
-        <button onClick={() => setNotes([])}>Clear Storage</button>
-        </main>
-    )
-}
+        <div className="app--wrapper">
+            <Navbar />
+            <main className="content--wrapper">
+                <Routes>
+                    <Route path="/" element={<Home />}/>
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/notes" element={<Notes />} />
+                    <Route path="/notes/:noteId" element={<Notes />} />
+                    <Route path="/notes/*" element={<Notes />} />
+                </Routes>
+            </main>
+        
+        </div>
+     )
+ }
 
